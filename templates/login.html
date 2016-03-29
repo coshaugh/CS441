@@ -1,20 +1,23 @@
-{% extends "index.html" %}
+{% extends "main.html" %}
 {% block content %}
-	<section>
-		<p>GREETING: {{greeting}}</p>
+	<h1>Login</h1>
 
-		<form method="post">
-			<label for="username">Username:</label>
-			<input name="username" type="text" maxlength="30" /><br />
-			
-			<label for="password">Password:</label>
-			<input name="password" type="password" maxlength="15" /><br />
-			
-			<input name="log_in" type="submit" value="Log In" /><br />
-			<input name="new_user" type="submit" value="New User" />
-		</form>
+	{% if failed %}
+			<strong>Login failed!</strong> Check your credentials and try again.
+	{% endif %}
 
-		<a href="/">Forgot Password?</a>
-	
-	</section>
+	<form method="post">
+		<label for="username">Username:</label>
+		<input name="username" type="text" value="{{ username }}" maxlength="30" /><br />
+
+		<label for="password">Password:</label>
+		<input name="password" type="password" maxlength="12" /><br />
+
+		<input type="submit" value="Log In" /><br />
+	</form>
+
+	<input type="button" onclick="window.location = '/signup';" value="New User" />
+
+	<a href="/forgot">Forgot Password?</a>
+
 {% endblock %}

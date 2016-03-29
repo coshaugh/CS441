@@ -13,8 +13,20 @@ handlers:
   static_files: style.css
   upload: style\.css
 
+- url: /signup
+  script: main.app
+  secure: always
+
+- url: /login
+  script: main.app
+  secure: always
+
+- url: /forgot
+  script: main.app
+  secure: always
+
 - url: .*
-  script: webInterface.app
+  script: main.app
 
 libraries:
 - name: webapp2
