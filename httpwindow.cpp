@@ -247,7 +247,7 @@ void HttpWindow::httpFinished()
         delete file;
         file = Q_NULLPTR;
 
-        playlist->addMedia(QUrl::fromLocalFile(fi.absoluteFilePath()));
+        //playlist->addMedia(QUrl::fromLocalFile(fi.absoluteFilePath()));
     }
 
     if (httpRequestAborted) {
@@ -283,12 +283,12 @@ void HttpWindow::httpFinished()
 
     statusLabel->setText(tr("Downloaded %1 bytes to %2\nin\n%3")
                          .arg(fi.size()).arg(fi.fileName(), QDir::toNativeSeparators(fi.absolutePath())));
-    playlist->addMedia(QUrl::fromLocalFile(fi.absoluteFilePath()));//**************************
+    //playlist->addMedia(QUrl::fromLocalFile(fi.absoluteFilePath()));//**************************
     if (launchCheckBox->isChecked()){//music player//////////////////////
 
         //playlist->addMedia(QUrl::fromLocalFile("C:/Users/User/Downloads/roar.mp3"));
         //playlist->addMedia(QUrl::fromLocalFile("C:/Users/User/Downloads/index.mp3"));
-                 //   playlist->addMedia(QUrl::fromLocalFile(fi.absoluteFilePath()));//**********
+                    playlist->addMedia(QUrl::fromLocalFile(fi.absoluteFilePath()));//**********
         //player->setMedia(QUrl::fromLocalFile("C:/Users/User/Downloads/roar.mp3"));
         //player->setMedia(QUrl::fromLocalFile(fi.absoluteFilePath()));
      player->setVolume(50);
@@ -371,15 +371,17 @@ void HttpWindow::playPlayer()
 }
 void HttpWindow::previousPlayer()
 {
-    playlist->previousIndex(0);
+  playlist->previous();
+    //playlist->previousIndex(0);
     //player->play();
-    player->setPlaylist(playlist);
+    //player->setPlaylist(playlist);
     player->play();
 }
 void HttpWindow::nextPlayer()
 {
-    playlist->nextIndex(1);
+  playlist->next();
+    //playlist->nextIndex(1);
     //player->play();
-    player->setPlaylist(playlist);
+    //player->setPlaylist(playlist);
     player->play();
 }
