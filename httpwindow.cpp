@@ -47,6 +47,7 @@
 #include <QMediaPlayer>
 #include <QMediaPlaylist>
 #include <QQueue>
+#include <QList>
 
 #include "httpwindow.h"
 #include "ui_authenticationdialog.h"
@@ -56,11 +57,19 @@ static const char defaultUrl[] = "";
 #else
 static const char defaultUrl[] = "";
 #endif
-static const char defaultFileName[] = "index.mp3";
+static const char defaultFileName[] = "index0.mp3";
 
 
-QMediaPlayer *player = new QMediaPlayer();
-QMediaPlaylist *playlist = new QMediaPlaylist();
+QMediaPlayer *player = new QMediaPlayer();//Our MP3 Player
+QMediaPlaylist *playlist = new QMediaPlaylist();//Our Playlist
+QQueue<QMediaContent> songsThatNeedToBeAdded;//Was going to use to hold player state
+QList<QString> songNameList;//List of all song names(given by user)
+QMediaContent currentSong;//The current playing song (was going to use to hold player state)
+QMediaContent newlyAddedSong;//Song that was just downloaded (was going to use to hold player state by adding to the songsThatNeedToBeAdded QQueue)
+QMediaContent firstSongAdded;//The first song added (again, player state)
+int songIndex = 0;//actual song index
+int songNameIndex = 0;//song name index (to be used with the QList)
+int totalNumberOfSongs = -1;//the total number of songs in the playlist(might be a way to do this via a QPlaylist method?)
 
 ProgressDialog::ProgressDialog(const QUrl &url, QWidget *parent)
   : QProgressDialog(parent)
@@ -82,6 +91,7 @@ void ProgressDialog::networkReplyProgress(qint64 bytesRead, qint64 totalBytes)
 HttpWindow::HttpWindow(QWidget *parent)
     : QDialog(parent)
     , statusLabel(new QLabel(tr("Please enter the URL of a file you want to download.\n\n"), this))
+    , songNameLabel(new QLabel(tr("Current Song Name Will Be Here")))
     , urlLineEdit(new QLineEdit(defaultUrl))
     , downloadButton(new QPushButton(tr("Download")))
     , previousButton(new QPushButton(tr("Previous")))
@@ -118,6 +128,8 @@ HttpWindow::HttpWindow(QWidget *parent)
     formLayout->addRow(tr("Default &file:"), defaultFileLineEdit);
     launchCheckBox->setChecked(true);
     formLayout->addRow(launchCheckBox);
+    formLayout->addRow(songNameLabel);
+
 
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     mainLayout->addLayout(formLayout);
@@ -129,6 +141,10 @@ HttpWindow::HttpWindow(QWidget *parent)
 
     downloadButton->setDefault(true);
     connect(downloadButton, &QAbstractButton::clicked, this, &HttpWindow::downloadFile);
+
+/**
+    connect(downloadButton, &QAbstractButton::clicked, this, &HttpWindow::initializePlaylist);
+*/
 
 
     pauseButton->setDefault(true);
@@ -283,27 +299,47 @@ void HttpWindow::httpFinished()
 
     statusLabel->setText(tr("Downloaded %1 bytes to %2\nin\n%3")
                          .arg(fi.size()).arg(fi.fileName(), QDir::toNativeSeparators(fi.absolutePath())));
-    //playlist->addMedia(QUrl::fromLocalFile(fi.absoluteFilePath()));//**************************
-    if (launchCheckBox->isChecked()){//music player//////////////////////
 
-        //playlist->addMedia(QUrl::fromLocalFile("C:/Users/User/Downloads/roar.mp3"));
-        //playlist->addMedia(QUrl::fromLocalFile("C:/Users/User/Downloads/index.mp3"));
-                    playlist->addMedia(QUrl::fromLocalFile(fi.absoluteFilePath()));//**********
-        //player->setMedia(QUrl::fromLocalFile("C:/Users/User/Downloads/roar.mp3"));
-        //player->setMedia(QUrl::fromLocalFile(fi.absoluteFilePath()));
+    songNameList.append(fi.fileName());
+
+    if (launchCheckBox->isChecked()){
+
+     playlist->addMedia(QUrl::fromLocalFile(fi.absoluteFilePath()));//**********
      player->setVolume(50);
-        //playlist->setCurrentIndex(0);
-     player->setPlaylist(playlist);
-//     if (QMediaPlayer::StoppedState == 0)//stopped
-//       player->play();//want to change from playing by default -> to a slot from a button (Play) signal
+     player->setPlaylist(playlist);//***************
+
+     //All these if/elses were some of my attempts to hold the player state when songs are being downloaded
+     /**
+     if(songIndex == 0)
+     {
+        firstSongAdded = QUrl::fromLocalFile(fi.absoluteFilePath());
+     }
+
+     if (QMediaPlayer::NoMedia == 1)//playing (0 = stopped, 1 = playing, 2 = paused)
+     {
+         if(!songsThatNeedToBeAdded.isEmpty()){
+             while(!songsThatNeedToBeAdded.isEmpty())
+             {
+                 playlist->addMedia((songsThatNeedToBeAdded.dequeue()));
+             }
+            player->setPlaylist(playlist);
+         }
+         else{
+             player->setPlaylist(playlist);
+         }
+     }
+     else
+     {
+         songsThatNeedToBeAdded.enqueue(QUrl::fromLocalFile(fi.absoluteFilePath()));
+     }
+     */
 }
-   // playlist->addMedia(QUrl::fromLocalFile(fi.absoluteFilePath()));//**************************
-
-    //QQueue<QUrl> pList;// = new QQueue();
-    //pList.enqueue(QUrl::fromLocalFile(fi.absoluteFilePath()));
-
-        //QDesktopServices::openUrl(pList.dequeue());
+    newlyAddedSong = QUrl::fromLocalFile(fi.absoluteFilePath());
+    //player->setMedia(currentSong);
+    //player->setPlaylist(playlist);//***************
     downloadButton->setEnabled(true);
+    songIndex++;
+    totalNumberOfSongs++;
 }
 
 void HttpWindow::httpReadyRead()
@@ -363,25 +399,53 @@ void HttpWindow::sslErrors(QNetworkReply*,const QList<QSslError> &errors)
 
 void HttpWindow::pausePlayer()
 {
+    currentSong = player->currentMedia();
     player->pause();
 }
 void HttpWindow::playPlayer()
-{
+{   
+    //Again, these if/elses were attempts to get the player to hold it's state
+    /**
+    if(QMediaPlayer::NoMedia == 1)
+    {
+        player->setMedia(firstSongAdded);
+        songNameLabel->setText(songNameList[songNameIndex]);
+        player->play();
+    }
+    else{
+    currentSong = player->currentMedia();
+    player->setMedia(currentSong);
+    //currentSong = playlist->currentMedia();
+    //player->setMedia(currentSong);
+    //currentSong = (QMediaContent)songPlaylist->dequeue();
+    songNameLabel->setText(songNameList[songNameIndex]);
+    player->play();
+    }
+    */
+    songNameLabel->setText(songNameList[songNameIndex]);
     player->play();
 }
 void HttpWindow::previousPlayer()
 {
-  playlist->previous();
-    //playlist->previousIndex(0);
-    //player->play();
-    //player->setPlaylist(playlist);
+    playlist->previous();
+    //player->setPlaylist(playlist);*
+    //currentSong = playlist->currentMedia();
+    if (songNameIndex > 0){
+    songNameIndex--;
+    songNameLabel->setText(songNameList[songNameIndex]);
     player->play();
+    }
+    //player->play();
 }
 void HttpWindow::nextPlayer()
 {
-  playlist->next();
-    //playlist->nextIndex(1);
-    //player->play();
-    //player->setPlaylist(playlist);
+    playlist->next();
+    //player->setPlaylist(playlist);*
+    //currentSong = playlist->currentMedia();
+    if (songNameIndex < totalNumberOfSongs){
+    songNameIndex++;
+    songNameLabel->setText(songNameList[songNameIndex]);
     player->play();
+    }
+    //player->play();
 }
