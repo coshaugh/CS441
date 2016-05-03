@@ -110,13 +110,6 @@ HttpWindow::HttpWindow(QWidget *parent)
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setWindowTitle(tr("HTTP"));
 
-    connect(&qnam, &QNetworkAccessManager::authenticationRequired,
-            this, &HttpWindow::slotAuthenticationRequired);
-#ifndef QT_NO_SSL
-    connect(&qnam, &QNetworkAccessManager::sslErrors,
-            this, &HttpWindow::sslErrors);
-#endif
-
     QFormLayout *formLayout = new QFormLayout;
     urlLineEdit->setClearButtonEnabled(true);
     connect(urlLineEdit, &QLineEdit::textChanged,
@@ -143,10 +136,6 @@ HttpWindow::HttpWindow(QWidget *parent)
 
     downloadButton->setDefault(true);
     connect(downloadButton, &QAbstractButton::clicked, this, &HttpWindow::downloadFile);
-
-/**
-    connect(downloadButton, &QAbstractButton::clicked, this, &HttpWindow::initializePlaylist);
-*/
 
 
     pauseButton->setDefault(true);
@@ -237,19 +226,6 @@ void HttpWindow::downloadFile()
         songsThatNeedToBeDownloaded.enqueue(newUrl);
     else
         startRequest(newUrl);
-    /**
-    else if (!songsThatNeedToBeDownloaded.isEmpty())
-    {
-        songsThatNeedToBeDownloaded.enqueue(newUrl);
-        while (!songsThatNeedToBeDownloaded.isEmpty() && songBeingDownloaded == false)
-        {
-        QUrl tempURL = songsThatNeedToBeDownloaded.dequeue();
-        startRequest(tempURL);
-        }
-    }
-    else
-        startRequest(newUrl);
-        */
 }
 
 QFile *HttpWindow::openFileForWrite(const QString &fileName)
@@ -336,31 +312,6 @@ void HttpWindow::httpFinished()
      //player->setVolume(50);
      //player->setPlaylist(playlist);
 
-     //All these if/elses were some of my attempts to hold the player state when songs are being downloaded
-     /**
-     if(songIndex == 0)
-     {
-        firstSongAdded = QUrl::fromLocalFile(fi.absoluteFilePath());
-     }
-
-     if (QMediaPlayer::NoMedia == 1)//playing (0 = stopped, 1 = playing, 2 = paused)
-     {
-         if(!songsThatNeedToBeAdded.isEmpty()){
-             while(!songsThatNeedToBeAdded.isEmpty())
-             {
-                 playlist->addMedia((songsThatNeedToBeAdded.dequeue()));
-             }
-            player->setPlaylist(playlist);
-         }
-         else{
-             player->setPlaylist(playlist);
-         }
-     }
-     else
-     {
-         songsThatNeedToBeAdded.enqueue(QUrl::fromLocalFile(fi.absoluteFilePath()));
-     }
-     */
 }
     //newlyAddedSong = QUrl::fromLocalFile(fi.absoluteFilePath());
     //player->setMedia(currentSong);
@@ -388,46 +339,6 @@ void HttpWindow::enableDownloadButton()
     downloadButton->setEnabled(!urlLineEdit->text().isEmpty());
 }
 
-void HttpWindow::slotAuthenticationRequired(QNetworkReply*,QAuthenticator *authenticator)
-{
-    QDialog authenticationDialog;
-    Ui::Dialog ui;
-    ui.setupUi(&authenticationDialog);
-    authenticationDialog.adjustSize();
-    ui.siteDescription->setText(tr("%1 at %2").arg(authenticator->realm(), url.host()));
-
-    // Did the URL have information? Fill the UI
-    // This is only relevant if the URL-supplied credentials were wrong
-    ui.userEdit->setText(url.userName());
-    ui.passwordEdit->setText(url.password());
-
-    if (authenticationDialog.exec() == QDialog::Accepted) {
-        authenticator->setUser(ui.userEdit->text());
-        authenticator->setPassword(ui.passwordEdit->text());
-    }
-}
-
-#ifndef QT_NO_SSL
-void HttpWindow::sslErrors(QNetworkReply*,const QList<QSslError> &errors)
-{
-    QString errorString;
-    foreach (const QSslError &error, errors) {
-        if (!errorString.isEmpty())
-            errorString += '\n';
-        errorString += error.errorString();
-    }
-
-    if (QMessageBox::warning(this, tr("SSL Errors"),
-                             tr("One or more SSL errors has occurred:\n%1").arg(errorString),
-                             QMessageBox::Ignore | QMessageBox::Abort) == QMessageBox::Ignore) {
-        reply->ignoreSslErrors();
-    }
-}
-#endif
-
-
-
-
 void HttpWindow::pausePlayer()
 {
     player->pause();
@@ -435,23 +346,6 @@ void HttpWindow::pausePlayer()
 void HttpWindow::playPlayer()
 {   
     //Again, these if/elses were attempts to get the player to hold it's state
-    /**
-    if(QMediaPlayer::NoMedia == 1)
-    {
-        player->setMedia(firstSongAdded);
-        songNameLabel->setText(songNameList[songNameIndex]);
-        player->play();
-    }
-    else{
-    currentSong = player->currentMedia();
-    player->setMedia(currentSong);
-    //currentSong = playlist->currentMedia();
-    //player->setMedia(currentSong);
-    //currentSong = (QMediaContent)songPlaylist->dequeue();
-    songNameLabel->setText(songNameList[songNameIndex]);
-    player->play();
-    }
-    */
     songNameLabel->setText(songNameList[songNameIndex]);
     //player->setMedia(tempPlaylist[songIndex]);
     player->play();
