@@ -19,10 +19,9 @@ class Server : public QObject
     Q_OBJECT
 public:
     explicit Server(QString name,QObject *parent = 0);
-    QString getLinkBuffer();
-
-
     ~Server();
+
+    QString getLinkBuffer();
 public slots:
     QString readMessage(QLocalSocket* clientConnection);
     void receiveConnection();

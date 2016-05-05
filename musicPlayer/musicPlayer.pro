@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network
+QT       += core gui network multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -18,13 +18,15 @@ SOURCES += main.cpp\
     hostuser.cpp \
     clientuser.cpp \
     server.cpp \
-    client.cpp
+    client.cpp \
+    player.cpp
 
 HEADERS  += mainwindow.h \
     user.h \
     hostuser.h \
     clientuser.h \
     server.h \
-    client.h
+    client.h \
+    player.h
 
 FORMS    += mainwindow.ui
