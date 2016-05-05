@@ -8,8 +8,8 @@ class HostUser : public User
 public:
     HostUser();
     HostUser(QString);
-private:
     Server *myServer;
+private:
     QList<QString> recievedMessages;
 public slots:
     void storeMessage(QString);

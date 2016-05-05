@@ -6,7 +6,8 @@
 #include <user.h>
 #include <player.h>
 #include <QString>
-
+#include "download.h"
+#include <QObject>
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -20,6 +21,11 @@ int main(int argc, char *argv[])
 */
 
     Player musicPlayer;
+    Download downloader;
+    HostUser user("fortune");
+
+    QObject::connect(user.myServer,SIGNAL(newMessage(QString)),&downloader,SLOT(downloadFile(QString)));
+
     QString filePath = "C:/Users/jappa_000/Downloads/ff7.mp3";
 
     musicPlayer.addSong(filePath);
@@ -28,7 +34,9 @@ int main(int argc, char *argv[])
     musicPlayer.addSong(filePath);
     musicPlayer.startPlaylist();
     musicPlayer.play();
-    HostUser Hello("fortune");
+    QString downloadLink = "https://www.youtube.com/watch?v=v-RE7RUzjf8";
+
+    //downloader.downloadFile(downloadLink);
 
     return a.exec();
 }

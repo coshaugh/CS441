@@ -19,7 +19,8 @@ SOURCES += main.cpp\
     clientuser.cpp \
     server.cpp \
     client.cpp \
-    player.cpp
+    player.cpp \
+    download.cpp
 
 HEADERS  += mainwindow.h \
     user.h \
@@ -27,6 +28,7 @@ HEADERS  += mainwindow.h \
     clientuser.h \
     server.h \
     client.h \
-    player.h
+    player.h \
+    download.h
 
 FORMS    += mainwindow.ui

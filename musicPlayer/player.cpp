@@ -1,9 +1,10 @@
 #include "player.h"
+#include "download.h"
 #include <QDebug>
 Player::Player(QObject *parent) : QObject(parent)
 {
     currentIndex=-1;
-    playlist = new QMediaPlaylist();
+    //playlist = new QMediaPlaylist();
     mediaPlayer = new QMediaPlayer();
     mediaPlayer->setVolume(50);
     connect(mediaPlayer,SIGNAL(stateChanged(QMediaPlayer::State)),this,SLOT(playNextSong()));
@@ -11,7 +12,6 @@ Player::Player(QObject *parent) : QObject(parent)
 }
 Player::~Player(){
     delete mediaPlayer;
-    delete playlist;
 }
 
 void Player::addSong(QString filePath){

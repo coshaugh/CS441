@@ -22,7 +22,7 @@ public slots:
     void playNextSong();
 private:
     int currentIndex;
-    QMediaPlaylist* playlist;
+    //QMediaPlaylist* playlist;
     QMediaPlayer *mediaPlayer;
     QList<QString> musicList;
 

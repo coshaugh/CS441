@@ -50,7 +50,7 @@ QString Server::readMessage(QLocalSocket* clientConnection)
     in >> message;
     message= message.remove(QChar('\"'));
     qDebug()<<"Recieved Message is "<<message;
-    emit newMessage( message);
+    emit newMessage(message);
     messageBuffer = message;
     return message;
 
