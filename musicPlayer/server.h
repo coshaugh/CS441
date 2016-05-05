@@ -1,42 +1,43 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include <QObject>
 #include <QDialog>
 #include <QString>
-#include <qlocalserver.h>
-#include <qlocalsocket.h>
+#include <QTcpSocket>
 
 QT_BEGIN_NAMESPACE
 class QLabel;
 class QPushButton;
-class QLocalServer;
+
+class QTcpServer;
+class QNetworkSession;
+class QTcpSocket;
 QT_END_NAMESPACE
 
 
-class Server : public QObject
+class Server : public QDialog
 {
     Q_OBJECT
 public:
-    explicit Server(QString name,QObject *parent = 0);
+    explicit Server(QWidget *parent = Q_NULLPTR);
     ~Server();
 
-    QString getLinkBuffer();
-public slots:
-    QString readMessage(QLocalSocket* clientConnection);
+private slots:
+    void sessionOpened();
+
+    void readMessage();
     void receiveConnection();
-    void test(QString);
 
 private:
     QString messageBuffer;
-    quint16 blockSize;
     QString serverName;
-    int totalRequests;
-    QLocalServer *myServer;
-    QLocalSocket *clientConnection;
-signals:
-    void newMessage(QString message);
+    quint16 blockSize;
 
+    int totalRequests;
+
+    QTcpServer *myServer;
+    QNetworkSession *clientConnection;
+    QTcpSocket *tcpSocket;
 };
 
 #endif // SERVER_H

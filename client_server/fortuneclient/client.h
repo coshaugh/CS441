@@ -21,10 +21,7 @@ public:
     explicit Client(QWidget *parent = Q_NULLPTR);
 
 private slots:
-    void requestNewFortune();
-    void readFortune();
     void displayError(QAbstractSocket::SocketError socketError);
-    void enableGetFortuneButton();
     void sessionOpened();
 
     void enableSubmitLinkButton();
@@ -34,10 +31,8 @@ private:
     QComboBox *hostCombo;
     QLineEdit *portLineEdit;
     QLabel *statusLabel;
-    QPushButton *getFortuneButton;
 
     QTcpSocket *tcpSocket;
-    QString currentFortune;
     quint16 blockSize;
 
     QNetworkSession *networkSession;
