@@ -12,6 +12,7 @@ Server::Server(QWidget *parent)
     , networkSession(0)
     , blockSize(0)
     , linkCombo(new QComboBox)
+    //, tcpSocket(new QTcpSocket)
 {
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
     statusLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
@@ -40,6 +41,15 @@ Server::Server(QWidget *parent)
         sessionOpened();
     }
 //----------------------------------------------------------------------------------------------------------------
+
+    fortunes << tr("You've been leading a dog's life. Stay off the furniture.")
+             << tr("You've got to think about tomorrow.")
+             << tr("You will be surprised by a loud noise.")
+             << tr("You will feel hungry again in another hour.")
+             << tr("You might have mail.")
+             << tr("You cannot kill time without injuring eternity.")
+             << tr("Computers are not intelligent. They only think they are.");
+
     QLabel *youTubeLinksLabel = new QLabel(tr("youTubeLinksLabel:"));
     youTubeLinksLabel->setBuddy(linkCombo);
 
@@ -51,8 +61,11 @@ Server::Server(QWidget *parent)
     buttonLayout->addWidget(quitButton);
     buttonLayout->addStretch(1);
 //----------------------------------------------------------------------------------------------------------------
+
     connect(quitButton, &QAbstractButton::clicked, this, &QWidget::close);
+    //connect(tcpServer, &QTcpServer::newConnection, this, &Server::sendFortune);
     connect(tcpServer, &QTcpServer::newConnection, this, &Server::storeLink);
+    //connect(tcpSocket, &QIODevice::readyRead, this, &Server::readData);
 //----------------------------------------------------------------------------------------------------------------
 
     QVBoxLayout *mainLayout = Q_NULLPTR;
@@ -123,12 +136,39 @@ void Server::sessionOpened()
                          .arg(ipAddress).arg(tcpServer->serverPort()));
 }
 
+void Server::sendFortune()
+{
+    QByteArray block;
+    QDataStream out(&block, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_4_0);
+    out << (quint16)0;
+    out << fortunes.at(qrand() % fortunes.size());
+    out.device()->seek(0);
+    out << (quint16)(block.size() - sizeof(quint16));
+
+    tcpSocket = tcpServer->nextPendingConnection();
+    connect(tcpSocket, &QAbstractSocket::disconnected,
+            tcpSocket, &QObject::deleteLater);
+
+    tcpSocket->write(block);
+    tcpSocket->disconnectFromHost();
+
+    QString derp = "fortune sent!";
+    linkCombo->addItem(derp);
+    tcpSocket->close();
+}
+
 void Server::storeLink()
 {
     tcpSocket = tcpServer->nextPendingConnection();
     connect(tcpSocket, &QAbstractSocket::disconnected,
             tcpSocket, &QObject::deleteLater);
     connect(tcpSocket, &QIODevice::readyRead, this, &Server::readData);
+#if 0
+    while (tcpSocket->bytesAvailable()<(int)sizeof(qint16))
+        tcpSocket->waitForReadyRead();
+    readData(tcpSocket);
+#endif
 }
 
 void Server::readData()

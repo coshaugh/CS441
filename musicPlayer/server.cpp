@@ -3,11 +3,7 @@
 #include <QtNetwork>
 #include <stdlib.h>
 #include <QDebug>
-Server::Server(QWidget *parent)
-    : QDialog(parent)
-    , myServer(Q_NULLPTR)
-    , clientConnection(0)
-    , blockSize(0)
+Server::Server(QString name,QObject *parent) : QObject(parent)
 {
     totalRequests=0;
     myServer = new QLocalServer(this);
@@ -22,7 +18,7 @@ Server::Server(QWidget *parent)
 }
 Server::~Server()
 {
-    qDebug()<<"Deleted Server";
+    qDebug()<<"Deleted Server ";
     delete myServer;
 }
 
@@ -30,77 +26,40 @@ void Server::receiveConnection(){
     qDebug()<<"Recieved Connection";
     clientConnection = myServer->nextPendingConnection();
 
-    connect(clientConnection, &QAbstractSocket::disconnected,
-            clientConnection, &QObject::deleteLater);
-    connect(clientConnection, &QIODevice::readyRead, this, &Server::readMessage);
+    connect(clientConnection, SIGNAL(disconnected()),
+            clientConnection, SLOT(deleteLater()));
 
+
+    while (clientConnection->bytesAvailable() < (int)sizeof(quint16))
+        clientConnection->waitForReadyRead();
+
+    readMessage(clientConnection);
+    clientConnection->disconnectFromServer();
 }
 
-void Server::readMessage()
+QString Server::readMessage(QLocalSocket* clientConnection)
 {
     qDebug()<<"Started Reading Message";
     QDataStream in(clientConnection);
     in.setVersion(QDataStream::Qt_4_0);
-    if (blockSize == 0) {
-        if (tcpSocket->bytesAvailable() < (int)sizeof(quint16))
-            return;
-        in >> blockSize;
-    }
-
-    if (tcpSocket->bytesAvailable() < blockSize)
-        return;
-
+    quint16 bytes_to_read;
+    in >> bytes_to_read;
     qDebug()<<"Finished Reading Message";
 
     QString message;
     in >> message;
     message= message.remove(QChar('\"'));
-    qDebug()<<"Recieved Message is "<< message;
-
-    clientConnection->disconnectFromHost();
-    blockSize = 0;
+    qDebug()<<"Recieved Message is "<<message;
+    emit newMessage(message);
+    messageBuffer = message;
+    return message;
 
 }
 
-void Server::sessionOpened()
-{
-    // Save the used configuration
-    if (networkSession) {
-        QNetworkConfiguration config = networkSession->configuration();
-        QString id;
-        if (config.type() == QNetworkConfiguration::UserChoice)
-            id = networkSession->sessionProperty(QLatin1String("UserChoiceConfiguration")).toString();
-        else
-            id = config.identifier();
+void Server::test(QString message){
+    qDebug()<<"Recieved Emit Message "<<message;
+}
 
-        QSettings settings(QSettings::UserScope, QLatin1String("QtProject"));
-        settings.beginGroup(QLatin1String("QtNetwork"));
-        settings.setValue(QLatin1String("DefaultNetworkConfiguration"), id);
-        settings.endGroup();
-    }
-
-    tcpServer = new QTcpServer(this);
-    if (!tcpServer->listen()) {
-        QMessageBox::critical(this, tr("Fortune Server"),
-                              tr("Unable to start the server: %1.")
-                              .arg(tcpServer->errorString()));
-        close();
-        return;
-    }
-    QString ipAddress;
-    QList<QHostAddress> ipAddressesList = QNetworkInterface::allAddresses();
-    // use the first non-localhost IPv4 address
-    for (int i = 0; i < ipAddressesList.size(); ++i) {
-        if (ipAddressesList.at(i) != QHostAddress::LocalHost &&
-            ipAddressesList.at(i).toIPv4Address()) {
-            ipAddress = ipAddressesList.at(i).toString();
-            break;
-        }
-    }
-    // if we did not find one, use IPv4 localhost
-    if (ipAddress.isEmpty())
-        ipAddress = QHostAddress(QHostAddress::LocalHost).toString();
-    statusLabel->setText(tr("The server is running on\n\nIP: %1\nport: %2\n\n"
-                            "Run the Fortune Client example now.")
-                         .arg(ipAddress).arg(tcpServer->serverPort()));
+QString Server::getLinkBuffer(){
+    return messageBuffer;
 }

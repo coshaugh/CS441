@@ -7,6 +7,7 @@ Client::Client(QWidget *parent)
     : QDialog(parent)
     , hostCombo(new QComboBox)
     , portLineEdit(new QLineEdit)
+    , getFortuneButton(new QPushButton(tr("Get Fortune")))
     , tcpSocket(new QTcpSocket(this))
     , blockSize(0)
     , networkSession(Q_NULLPTR)
@@ -51,7 +52,10 @@ Client::Client(QWidget *parent)
     linkLabel->setBuddy(linkEdit);
 
     statusLabel = new QLabel(tr("This examples requires that you run the "
-                                "Server example as well."));
+                                "Fortune Server example as well."));
+
+    getFortuneButton->setDefault(true);
+    getFortuneButton->setEnabled(false);
 
     submitLinkButton->setDefault(true);
     submitLinkButton->setEnabled(false);
@@ -59,22 +63,28 @@ Client::Client(QWidget *parent)
     QPushButton *quitButton = new QPushButton(tr("Quit"));
 
     QDialogButtonBox *buttonBox = new QDialogButtonBox;
-    buttonBox->addButton(submitLinkButton, QDialogButtonBox::ActionRole);
+    buttonBox->addButton(getFortuneButton, QDialogButtonBox::ActionRole);
     buttonBox->addButton(quitButton, QDialogButtonBox::RejectRole);
+
+    buttonBox->addButton(submitLinkButton, QDialogButtonBox::ActionRole);
 
 //----------------------------------------------------------------------------------------------------------------
     connect(hostCombo, &QComboBox::editTextChanged,
-            this, &Client::enableSubmitLinkButton);
+            this, &Client::enableGetFortuneButton);
     connect(portLineEdit, &QLineEdit::textChanged,
-            this, &Client::enableSubmitLinkButton);
-    connect(linkEdit, &QLineEdit::textChanged,
-            this, &Client::enableSubmitLinkButton);
+            this, &Client::enableGetFortuneButton);
+    connect(getFortuneButton, &QAbstractButton::clicked,
+            this, &Client::requestNewFortune);
     connect(quitButton, &QAbstractButton::clicked, this, &QWidget::close);
-    connect(submitLinkButton, &QAbstractButton::clicked,
-            this, &Client::submitLink);
+    connect(tcpSocket, &QIODevice::readyRead, this, &Client::readFortune);
     typedef void (QAbstractSocket::*QAbstractSocketErrorSignal)(QAbstractSocket::SocketError);
     connect(tcpSocket, static_cast<QAbstractSocketErrorSignal>(&QAbstractSocket::error),
             this, &Client::displayError);
+
+    connect(linkEdit, &QLineEdit::textChanged,
+            this, &Client::enableSubmitLinkButton);
+    connect(submitLinkButton, &QAbstractButton::clicked,
+            this, &Client::submitLink);
 
 //----------------------------------------------------------------------------------------------------------------
     QGridLayout *mainLayout = Q_NULLPTR;
@@ -124,9 +134,45 @@ Client::Client(QWidget *parent)
         networkSession = new QNetworkSession(config, this);
         connect(networkSession, &QNetworkSession::opened, this, &Client::sessionOpened);
 
+        getFortuneButton->setEnabled(false);
         statusLabel->setText(tr("Opening network session."));
         networkSession->open();
     }
+}
+
+void Client::requestNewFortune()
+{
+    getFortuneButton->setEnabled(false);
+    blockSize = 0;
+    tcpSocket->abort();
+    tcpSocket->connectToHost(hostCombo->currentText(),
+                             portLineEdit->text().toInt());
+}
+
+void Client::readFortune()
+{
+    QDataStream in(tcpSocket);
+    in.setVersion(QDataStream::Qt_4_0);
+
+    if (blockSize == 0) {
+        if (tcpSocket->bytesAvailable() < (int)sizeof(quint16))
+            return;
+        in >> blockSize;
+    }
+
+    if (tcpSocket->bytesAvailable() < blockSize)
+        return;
+
+    QString nextFortune;
+    in >> nextFortune;
+
+    if (nextFortune == currentFortune) {
+        QTimer::singleShot(0, this, &Client::requestNewFortune);
+        return;
+    }
+    currentFortune = nextFortune;
+    statusLabel->setText(currentFortune);
+    getFortuneButton->setEnabled(true);
 }
 
 void Client::displayError(QAbstractSocket::SocketError socketError)
@@ -152,7 +198,16 @@ void Client::displayError(QAbstractSocket::SocketError socketError)
                                  .arg(tcpSocket->errorString()));
     }
 
+    getFortuneButton->setEnabled(true);
+
     submitLinkButton->setEnabled(true);
+}
+
+void Client::enableGetFortuneButton()
+{
+    getFortuneButton->setEnabled((!networkSession || networkSession->isOpen()) &&
+                                 !hostCombo->currentText().isEmpty() &&
+                                 !portLineEdit->text().isEmpty());
 }
 
 void Client::enableSubmitLinkButton()
@@ -180,6 +235,8 @@ void Client::sessionOpened()
 
     statusLabel->setText(tr("This examples requires that you run the "
                             "Fortune Server example as well."));
+
+    enableGetFortuneButton();
 
     enableSubmitLinkButton();
 }
