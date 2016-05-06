@@ -37,6 +37,3 @@ int main(int argc, char *argv[])
     qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
     return app.exec();
 }
-
-//test link
-//https://www.youtube.com/watch?v=eUkSTnUK_T0
