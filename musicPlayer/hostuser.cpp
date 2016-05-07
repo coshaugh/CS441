@@ -6,8 +6,7 @@ HostUser::HostUser() :User()
     myServer=new Server(name);
 }
 
-HostUser::HostUser(QString name) :User(name)
-{
+HostUser::HostUser(QString name) :User(name){
     myServer=new Server(name);
 }
 

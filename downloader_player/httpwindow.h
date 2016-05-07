@@ -76,6 +76,7 @@ class HttpWindow : public QDialog
 
 public:
     explicit HttpWindow(QWidget *parent = Q_NULLPTR);
+
     void startRequest(const QUrl &requestedUrl);
 
 private slots:
@@ -88,6 +89,14 @@ private slots:
     void httpFinished();
     void httpReadyRead();
     void enableDownloadButton();
+    void slotAuthenticationRequired(QNetworkReply*,QAuthenticator *);
+/**
+public slots:
+    void initializePlaylist(QMediaPlaylist* pList);
+*/
+#ifndef QT_NO_SSL
+    void sslErrors(QNetworkReply*,const QList<QSslError> &errors);
+#endif
 
 private:
     QFile *openFileForWrite(const QString &fileName);
