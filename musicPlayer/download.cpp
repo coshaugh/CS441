@@ -1,15 +1,20 @@
 #include "download.h"
 #include <QDebug>
+
+#include <QGlobal.h>
+#include <QTime>
+
 Download::Download(QObject *parent) : QObject(parent)
 {
     downloadDirectory = (QDir::toNativeSeparators(downloadDirectory));
+    QTime time = QTime::currentTime();
+    qsrand((uint)time.msec());
 }
 
 
 void Download::startRequest(const QUrl &requestedUrl){
     url = requestedUrl;
     httpRequestAborted = false;
-    delete reply;
     reply = qnam.get(QNetworkRequest(url));
     connect(reply, &QNetworkReply::finished, this, &Download::httpFinished);
     connect(reply, &QIODevice::readyRead, this, &Download::httpReadyRead);
@@ -25,9 +30,14 @@ QFile* Download::openFileForWrite(const QString &fileName){
     return file.take();
 }
 
+void Download::downloadYoutube(QString link){
+    downloadFile("http://www.youtubeinmp3.com/fetch/?video=" + link);
+}
+
 
 void Download::downloadFile(QString link){
-    const QString urlSpec = "http://www.youtubeinmp3.com/fetch/?video=" + link;
+    const QString urlSpec = link;
+    qDebug()<<urlSpec;
     if (link.isEmpty()){
         qDebug()<<"Parameter Empty";
         return;
@@ -41,8 +51,8 @@ void Download::downloadFile(QString link){
     fileName = newUrl.fileName();
     qDebug()<<"File Name is"<<fileName;
     if (fileName.isEmpty())
-        fileName = "default.mp3";
-
+        fileName = "default" + QString::number((qrand() % 1000000 +1)) + ".mp3";
+    qDebug()<<"New File Name is"<<fileName;
     if (QFile::exists(fileName)) {
         qDebug()<<"File Already Exists";
     }
@@ -94,10 +104,13 @@ void Download::httpFinished(){
         const QUrl redirectedUrl = url.resolved(redirectionTarget.toUrl());
         file = openFileForWrite(fi.absoluteFilePath());
         if (!file) {
+            qDebug()<<"This got called";
             return;
         }
         qDebug()<<"Redirected to newURL";
-        startRequest(redirectedUrl);
+        delete file;
+        //startRequest(redirectedUrl);
+        downloadFile(redirectedUrl.toEncoded());
         return;
         qDebug()<<"I SHOULD NEVER BE CALLED";
     }

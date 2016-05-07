@@ -21,6 +21,7 @@ public slots:
     void cancelDownload();
     void httpFinished();
     void httpReadyRead();
+    void downloadYoutube(QString);
 
 private:
     QFile *openFileForWrite(const QString &fileName);
