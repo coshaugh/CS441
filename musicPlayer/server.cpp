@@ -59,7 +59,8 @@ QString Server::readMessage(QLocalSocket* clientConnection)
 void Server::test(QString message){
     qDebug()<<"Recieved Emit Message "<<message;
 }
-
+/*
 QString Server::getLinkBuffer(){
     return messageBuffer;
 }
+*/

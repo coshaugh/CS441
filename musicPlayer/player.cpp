@@ -17,6 +17,14 @@ Player::~Player(){
 void Player::addSong(QString filePath){
     qDebug()<<"Added Song"<<filePath;
     musicList.append(filePath);
+    if (musicList.size() == 1){
+        startPlaylist();
+        play();
+    }
+    else if (musicList.size()>1 && musicList.size()<=currentIndex+1){
+        mediaPlayer->setMedia(QUrl::fromLocalFile(musicList[++currentIndex]));
+        play();
+    }
 
 }
 
@@ -51,11 +59,9 @@ void Player::startPlaylist(){
 void Player::playNextSong(){
     if (mediaPlayer->state() == QMediaPlayer::StoppedState){
         qDebug()<<"Stopped State";
-        if (musicList.size()>currentIndex+1) { //Fails when going to be out of index
+        if (musicList.size()-1>currentIndex) { //Fails when going to be out of index
             mediaPlayer->setMedia(QUrl::fromLocalFile(musicList[++currentIndex]));
             play();
         }
     }
-    else
-        qDebug()<<"Not Stopped State";
 }

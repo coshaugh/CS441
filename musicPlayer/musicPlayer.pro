@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     server.cpp \
     client.cpp \
     player.cpp \
-    download.cpp
+    download.cpp \
+    mediator.cpp
 
 HEADERS  += mainwindow.h \
     user.h \
@@ -29,6 +30,7 @@ HEADERS  += mainwindow.h \
     server.h \
     client.h \
     player.h \
-    download.h
+    download.h \
+    mediator.h
 
 FORMS    += mainwindow.ui
