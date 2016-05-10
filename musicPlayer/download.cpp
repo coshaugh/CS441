@@ -119,6 +119,8 @@ void Download::httpFinished(){
     emit finishedDownloading(filePath);
     }
 
+    if (fi.size() < 21000)
+        qDebug()<<"Error downloading song, try again or try a new link.";
 }
 
 void Download::httpReadyRead(){
