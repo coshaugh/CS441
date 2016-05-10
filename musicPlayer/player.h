@@ -20,14 +20,15 @@ public slots:
     void play();
     void pause();
     void playNextSong();
-    QString getSongName();
+    QString Player::getSongName();
+    qint64 Player::getDuration();
+    void Player::setVolume(int newVolume);
 private:
     int currentIndex;
     //QMediaPlaylist* playlist;
     QMediaPlayer *mediaPlayer;
     QList<QString> musicList;
-signals:
-    void newSong();
+
 
 };
 
