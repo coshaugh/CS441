@@ -6,14 +6,26 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    _player = NULL;
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    _player = NULL;
 }
 
-void MainWindow::on_pushButton_clicked()
+
+void MainWindow::setPlayer(Player* player){
+    this->_player = player;
+}
+
+void MainWindow::on_PauseButton_clicked()
 {
-    qDebug()<<"Testing";
+    _player->pause();
+}
+
+void MainWindow::on_PlayButton_clicked()
+{
+    _player->play();
 }

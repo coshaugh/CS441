@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 #include <client.h>
+#include <player.h>
 #include <QMainWindow>
 
 namespace Ui {
@@ -13,12 +14,17 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    void setPlayer(Player*);
 
 private slots:
-    void on_pushButton_clicked();
+    void on_PauseButton_clicked();
+
+    void on_PlayButton_clicked();
 
 private:
     Ui::MainWindow *ui;
+    Player* _player;
+
 };
 
 #endif // MAINWINDOW_H
