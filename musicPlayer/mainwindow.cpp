@@ -23,7 +23,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::setPlayer(Player* player){
     this->_player = player;
-    connect(_player,SIGNAL(newSong()),this,SLOT(changeSongName()));
 }
 
 void MainWindow::on_PauseButton_clicked()
@@ -34,6 +33,18 @@ void MainWindow::on_PauseButton_clicked()
 void MainWindow::on_PlayButton_clicked()
 {
     ui->SongName->setText(_player->getSongName());
+    int numberOfSeconds;
+    int numberOfMinutes = 0;
+    numberOfSeconds = _player->getDuration();
+    numberOfSeconds = numberOfSeconds / 1000;
+        while (numberOfSeconds > 60)
+        {
+            numberOfSeconds = numberOfSeconds - 60;
+            numberOfMinutes++;
+        }
+    ui->MinutesLabel->setNum(numberOfMinutes);
+    ui->ColonLabel->setText(":");
+    ui->SecondsLabel->setNum(numberOfSeconds);
     _player->play();
 }
 
@@ -49,7 +60,8 @@ void MainWindow::on_PreviousButton_clicked()
 
 void MainWindow::on_VolumeSlider_sliderMoved(int position)
 {
-    //_player->setVolume(position);
+    _player->setVolume(position);
+    ui->Volume->setNum(position);
 }
 
 void MainWindow::on_ProgressSlider_sliderMoved(int position)
@@ -66,8 +78,4 @@ void MainWindow::on_durationChanged(qint64 position)
 void MainWindow::on_positionChanged(qint64 position)
 {
     //ui->Duration->setValue(position);
-}
-
-void MainWindow::changeSongName(){
-    ui->SongName->setText(_player->getSongName());
 }
