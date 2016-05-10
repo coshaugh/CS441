@@ -39,11 +39,15 @@ void Player::pause(){
 }
 
 void Player::previous(){
-    //mediaPlayer->
+    currentIndex--;
+    if (currentIndex > -1)
+        mediaPlayer->setMedia(QUrl::fromLocalFile(musicList[currentIndex]));
 }
 
 void Player::next(){
-    //mediaPlayer->
+    currentIndex++;
+    if (currentIndex < musicList.size())
+        mediaPlayer->setMedia(QUrl::fromLocalFile(musicList[currentIndex]));
 }
 
 void Player::startPlaylist(){
