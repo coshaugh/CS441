@@ -36,6 +36,7 @@ private slots:
 
     void on_positionChanged(qint64 position);
 
+    void changeSongName();
 
 private:
     Ui::MainWindow *ui;

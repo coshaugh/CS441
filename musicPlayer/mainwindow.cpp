@@ -23,6 +23,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::setPlayer(Player* player){
     this->_player = player;
+    connect(_player,SIGNAL(newSong()),this,SLOT(changeSongName()));
 }
 
 void MainWindow::on_PauseButton_clicked()
@@ -65,4 +66,8 @@ void MainWindow::on_durationChanged(qint64 position)
 void MainWindow::on_positionChanged(qint64 position)
 {
     //ui->Duration->setValue(position);
+}
+
+void MainWindow::changeSongName(){
+    ui->SongName->setText(_player->getSongName());
 }

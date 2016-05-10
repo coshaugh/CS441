@@ -58,6 +58,8 @@ void Player::startPlaylist(){
     }
     currentIndex=0;
     mediaPlayer->setMedia(QUrl::fromLocalFile(musicList[currentIndex]));
+    emit newSong();
+
 }
 
 
@@ -67,11 +69,14 @@ void Player::playNextSong(){
         if (musicList.size()-1>currentIndex) { //Fails when going to be out of index
             mediaPlayer->setMedia(QUrl::fromLocalFile(musicList[++currentIndex]));
             play();
+            emit newSong();
         }
     }
 }
 
 QString Player::getSongName(){
+
        QString title = mediaPlayer->metaData(QMediaMetaData::Title).toString();
+       qDebug()<<title;
        return title;
 }
