@@ -20,6 +20,7 @@ public slots:
     void play();
     void pause();
     void playNextSong();
+    QString Player::getSongName();
 private:
     int currentIndex;
     //QMediaPlaylist* playlist;
