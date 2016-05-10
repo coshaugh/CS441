@@ -17,6 +17,7 @@ Player::~Player(){
 
 void Player::addSong(QString filePath){
     qDebug()<<"Added Song"<<filePath;
+    qDebug()<<"Press Play to Play";
     musicList.append(filePath);
     if (musicList.size() == 1){
         startPlaylist();
