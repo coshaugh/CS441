@@ -1,6 +1,7 @@
 #include "player.h"
 #include "download.h"
 #include <QDebug>
+#include <QMediaMetaData>
 Player::Player(QObject *parent) : QObject(parent)
 {
     currentIndex=-1;
@@ -68,4 +69,9 @@ void Player::playNextSong(){
             play();
         }
     }
+}
+
+QString Player::getSongName(){
+       QString title = mediaPlayer->metaData(QMediaMetaData::Title).toString();
+       return title;
 }
