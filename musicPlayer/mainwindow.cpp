@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QDebug>
+#include <QLabel>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -30,6 +32,7 @@ void MainWindow::on_PauseButton_clicked()
 
 void MainWindow::on_PlayButton_clicked()
 {
+    ui->SongName->setText(_player->getSongName());
     _player->play();
 }
 
