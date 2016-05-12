@@ -28,7 +28,7 @@ signals:
 private:
     int currentIndex;
     //QMediaPlaylist* playlist;
-    bool stopBool;
+    bool stopBool; //Used to make sure when it goes to a stop state, the player will not go to the next song automatically
     QMediaPlayer *mediaPlayer;
     QList<QString> musicList;
 

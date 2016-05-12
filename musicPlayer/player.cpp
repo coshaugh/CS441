@@ -6,7 +6,6 @@ Player::Player(QObject *parent) : QObject(parent)
 {
     stopBool = false;
     currentIndex=-1;
-    //playlist = new QMediaPlaylist();
     mediaPlayer = new QMediaPlayer();
     mediaPlayer->setVolume(50);
     connect(mediaPlayer,SIGNAL(stateChanged(QMediaPlayer::State)),this,SLOT(playNextSong()));
@@ -19,10 +18,12 @@ Player::~Player(){
 void Player::addSong(QString filePath){
     qDebug()<<"Added Song"<<filePath;
     musicList.append(filePath);
+    //Intial procedure to set start playing songs
     if (musicList.size() == 1){
         startPlaylist();
         play();
     }
+    //Automatically play songs when no more songs in the playlist
     else if (musicList.size()-2 == currentIndex && mediaPlayer->state() == QMediaPlayer::StoppedState){
         mediaPlayer->setMedia(QUrl::fromLocalFile(musicList[++currentIndex]));
         play();
