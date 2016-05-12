@@ -19,9 +19,9 @@ SOURCES += main.cpp\
     clientuser.cpp \
     server.cpp \
     client.cpp \
-    player.cpp \
     download.cpp \
-    mediator.cpp
+    mediator.cpp \
+    player.cpp
 
 HEADERS  += mainwindow.h \
     user.h \

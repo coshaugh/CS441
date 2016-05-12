@@ -36,7 +36,7 @@ private slots:
 
     void on_positionChanged(qint64 position);
 
-
+    void updateText();
 private:
     Ui::MainWindow *ui;
     Player* _player;

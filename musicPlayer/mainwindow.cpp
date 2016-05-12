@@ -9,8 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     _player = NULL;
-    //connect(_player, &Player::positionChanged, this, &MainWindow::on_positionChanged);
-    //connect(_player, &Player::durationChanged, this, &MainWindow::on_durationChanged);
+
 
 }
 
@@ -23,6 +22,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::setPlayer(Player* player){
     this->_player = player;
+    connect (_player,SIGNAL(playingNewSong()),this,SLOT(updateText()));
+    //connect(_player, &Player::positionChanged, this, &MainWindow::on_positionChanged);
+    //connect(_player, &Player::durationChanged, this, &MainWindow::on_durationChanged);
+
 }
 
 void MainWindow::on_PauseButton_clicked()
@@ -32,19 +35,6 @@ void MainWindow::on_PauseButton_clicked()
 
 void MainWindow::on_PlayButton_clicked()
 {
-    ui->SongName->setText(_player->getSongName());
-    int numberOfSeconds;
-    int numberOfMinutes = 0;
-    numberOfSeconds = _player->getDuration();
-    numberOfSeconds = numberOfSeconds / 1000;
-        while (numberOfSeconds > 60)
-        {
-            numberOfSeconds = numberOfSeconds - 60;
-            numberOfMinutes++;
-        }
-    ui->MinutesLabel->setNum(numberOfMinutes);
-    ui->ColonLabel->setText(":");
-    ui->SecondsLabel->setNum(numberOfSeconds);
     _player->play();
 }
 
@@ -78,4 +68,20 @@ void MainWindow::on_durationChanged(qint64 position)
 void MainWindow::on_positionChanged(qint64 position)
 {
     //ui->Duration->setValue(position);
+}
+
+void MainWindow::updateText(){
+    ui->SongName->setText(_player->getSongName());
+    int numberOfSeconds;
+    int numberOfMinutes = 0;
+    numberOfSeconds = _player->getDuration();
+    numberOfSeconds = numberOfSeconds / 1000;
+        while (numberOfSeconds > 60)
+        {
+            numberOfSeconds = numberOfSeconds - 60;
+            numberOfMinutes++;
+        }
+    ui->MinutesLabel->setNum(numberOfMinutes);
+    ui->ColonLabel->setText(":");
+    ui->SecondsLabel->setNum(numberOfSeconds);
 }

@@ -32,6 +32,12 @@ void Mediator::download(){
 }
 
 void Mediator::downloadToPlayer(QString filePath){
+
+    QFile file(filePath);
+    if (file.size() < 21000){
+        qDebug()<<"Error downloading song, try again or try a new link.";
+        return;
+    }
     _player->addSong(filePath);
 }
 

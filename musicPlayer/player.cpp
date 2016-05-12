@@ -4,6 +4,7 @@
 #include <QMediaMetaData>
 Player::Player(QObject *parent) : QObject(parent)
 {
+    stopBool = false;
     currentIndex=-1;
     //playlist = new QMediaPlaylist();
     mediaPlayer = new QMediaPlayer();
@@ -17,15 +18,14 @@ Player::~Player(){
 
 void Player::addSong(QString filePath){
     qDebug()<<"Added Song"<<filePath;
-    qDebug()<<"Press Play to Play";
     musicList.append(filePath);
     if (musicList.size() == 1){
         startPlaylist();
-        //play();
+        play();
     }
-    else if (musicList.size()>1 && musicList.size()<=currentIndex+1){
+    else if (musicList.size()-2 == currentIndex && mediaPlayer->state() == QMediaPlayer::StoppedState){
         mediaPlayer->setMedia(QUrl::fromLocalFile(musicList[++currentIndex]));
-        //play();
+        play();
     }
 
 }
@@ -33,6 +33,7 @@ void Player::addSong(QString filePath){
 void Player::play(){
     qDebug()<<"Playing Song";
     mediaPlayer->play();
+    emit playingNewSong();
 }
 
 void Player::pause(){
@@ -41,20 +42,31 @@ void Player::pause(){
 }
 
 void Player::previous(){
-    currentIndex--;
-    if (currentIndex > -1)
-        mediaPlayer->setMedia(QUrl::fromLocalFile(musicList[currentIndex]));
+    if (currentIndex >= 1){
+        stopBool = true;
+        mediaPlayer->stop();
+        mediaPlayer->setMedia(QUrl::fromLocalFile(musicList[--currentIndex]));
+        play();
+    }
+    else
+        //qDebug()<<"Cant go to previous song";
+    stopBool = false;
 }
 
 void Player::next(){
-    currentIndex++;
-    if (currentIndex < musicList.size())
-        mediaPlayer->setMedia(QUrl::fromLocalFile(musicList[currentIndex]));
+    if (currentIndex < musicList.size()-1) {
+        stopBool = true;
+        mediaPlayer->stop();
+        mediaPlayer->setMedia(QUrl::fromLocalFile(musicList[++currentIndex]));
+        play();
+    }
+        //qDebug()<<"Cant go to next song";
+    stopBool = false;
 }
 
 void Player::startPlaylist(){
     if (musicList.empty()){
-        qDebug()<<"Music List is Empty";
+      //  qDebug()<<"Music List is Empty";
         return;
     }
     currentIndex=0;
@@ -63,11 +75,10 @@ void Player::startPlaylist(){
 
 
 void Player::playNextSong(){
-    if (mediaPlayer->state() == QMediaPlayer::StoppedState){
+    if (mediaPlayer->state() == QMediaPlayer::StoppedState && !stopBool){
         qDebug()<<"Stopped State";
         if (musicList.size()-1>currentIndex) { //Fails when going to be out of index
-            mediaPlayer->setMedia(QUrl::fromLocalFile(musicList[++currentIndex]));
-            play();
+            next();
         }
     }
 }
